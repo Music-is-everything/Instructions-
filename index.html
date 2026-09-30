@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Our Little Secret 💛</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta name="theme-color" content="#87ceeb">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(
+        160deg,
+        #87ceeb,
+        #dcecff,
+        #ffe0ea
+      );
+      color: #222;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 430px;
+      padding: 30px 22px;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 28px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    .icon {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 32px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 5px 0 12px;
+      font-size: 28px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      margin-top: 14px;
+      border: none;
+      border-radius: 15px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #222;
+      color: white;
+      box-shadow: 0 7px 18px rgba(0,0,0,0.18);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #installBtn {
+      display: none;
+      background: #e6a900;
+      color: #111;
+    }
+
+    .hint {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="card">
+
+    <img src="icon.png" class="icon" alt="Our Little Secret">
+
+    <h1>A Little Something For You 🌻</h1>
+
+    <p>
+      This little page is just the beginning.
+      Install it on your phone and keep it close. 💛
+    </p>
+
+    <button id="installBtn">
+      📱 Install App
+    </button>
+
+    <button onclick="openPrivateWebsite()">
+      🔐 Open Private Website
+    </button>
+
+    <div class="hint">
+      Add this little app to your home screen for the full experience.
+    </div>
+
+  </main>
+
+  <script>
+    let deferredPrompt;
+
+    const installBtn = document.getElementById("installBtn");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      installBtn.style.display = "block";
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) {
+        alert(
+          "If the install button doesn't appear, open your browser menu and choose 'Add to Home screen'."
+        );
+        return;
+      }
+
+      deferredPrompt.prompt();
+
+      const { outcome } = await deferredPrompt.userChoice;
+
+      if (outcome === "accepted") {
+        installBtn.style.display = "none";
+      }
+
+      deferredPrompt = null;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      installBtn.style.display = "none";
+    });
+
+    function openPrivateWebsite() {
+
+      // CHANGE THIS TO YOUR PRIVATE WEBSITE
+      window.location.href = "https://YOUR-PRIVATE-WEBSITE.com";
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(() => console.log("Service Worker registered"))
+          .catch(error => console.log("Service Worker error:", error));
+      });
+    }
+  </script>
+
+</body>
+      </html>
