@@ -1,39 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-.device-id-box {
-  margin: 20px auto;
-  padding: 20px;
-  max-width: 400px;
-  text-align: center;
-  border-radius: 16px;
-  background: #111;
-  color: white;
-}
-
-.device-id-box h3 {
-  margin-bottom: 10px;
-}
-
-#deviceId {
-  font-family: monospace;
-  font-size: 18px;
-  letter-spacing: 2px;
-  word-break: break-all;
-  padding: 12px;
-  background: #222;
-  border-radius: 10px;
-}
-
-#copyDeviceId {
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-}
-  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -214,13 +181,13 @@
   <p id="deviceId">Generating Device ID...</p>
   <button id="copyDeviceId">Copy Device ID</button>
 </div>
+  <script>
+  const GOOGLE_SHEET_URL =
+    "https://script.google.com/macros/s/AKfycbzTMYDheR8uDZGbF4jz3JPHbyNVlIC_Zpl-2sWnh59BZ-ycVxdn4G3diDFWsyLlKuQ/exec";
 
-<script>
-  function generateDeviceId() {
-    // Check whether this device already has an ID
+  function getDeviceId() {
     let deviceId = localStorage.getItem("private_device_id");
 
-    // Generate a new ID only on first use
     if (!deviceId) {
       const randomPart = crypto.randomUUID()
         .replace(/-/g, "")
@@ -238,28 +205,48 @@
     return deviceId;
   }
 
-  // Get this device's ID
-  const deviceId = generateDeviceId();
+  async function registerDevice() {
+    const deviceId = getDeviceId();
 
-  // Display it
-  document.getElementById("deviceId").textContent = deviceId;
+    // Show ID while testing
+    const deviceIdElement = document.getElementById("deviceId");
 
-  // Copy button
-  document.getElementById("copyDeviceId").addEventListener("click", async () => {
+    if (deviceIdElement) {
+      deviceIdElement.textContent = deviceId;
+    }
+
+    // Prevent sending the same installation repeatedly
+    const alreadyRegistered =
+      localStorage.getItem("device_registered");
+
+    if (alreadyRegistered === "true") {
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(deviceId);
+      await fetch(GOOGLE_SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          deviceId: deviceId,
+          event: "app_opened"
+        })
+      });
 
-      const button = document.getElementById("copyDeviceId");
-      button.textContent = "Copied ✓";
+      // Remember that this device has been registered
+      localStorage.setItem("device_registered", "true");
 
-      setTimeout(() => {
-        button.textContent = "Copy Device ID";
-      }, 1500);
+      console.log("Device registered successfully:", deviceId);
 
     } catch (error) {
-      alert("Could not copy Device ID");
+      console.error("Device registration failed:", error);
     }
-  });
-</script>
+  }
+
+  registerDevice();
+  </script>
 </body>
 </html>
