@@ -175,5 +175,58 @@
       });
     }
   </script>
+  <!-- Device ID -->
+<div class="device-id-box">
+  <h3>My Device</h3>
+  <p id="deviceId">Generating Device ID...</p>
+  <button id="copyDeviceId">Copy Device ID</button>
+</div>
+
+<script>
+  function generateDeviceId() {
+    // Check whether this device already has an ID
+    let deviceId = localStorage.getItem("private_device_id");
+
+    // Generate a new ID only on first use
+    if (!deviceId) {
+      const randomPart = crypto.randomUUID()
+        .replace(/-/g, "")
+        .substring(0, 12)
+        .toUpperCase();
+
+      deviceId =
+        randomPart.substring(0, 4) + "-" +
+        randomPart.substring(4, 8) + "-" +
+        randomPart.substring(8, 12);
+
+      localStorage.setItem("private_device_id", deviceId);
+    }
+
+    return deviceId;
+  }
+
+  // Get this device's ID
+  const deviceId = generateDeviceId();
+
+  // Display it
+  document.getElementById("deviceId").textContent = deviceId;
+
+  // Copy button
+  document.getElementById("copyDeviceId").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(deviceId);
+
+      const button = document.getElementById("copyDeviceId");
+      button.textContent = "Copied ✓";
+
+      setTimeout(() => {
+        button.textContent = "Copy Device ID";
+      }, 1500);
+
+    } catch (error) {
+      alert("Could not copy Device ID");
+    }
+  });
+</script>
 </body>
 </html>
